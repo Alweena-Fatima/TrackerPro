@@ -1,70 +1,107 @@
-import React, { useState } from "react";
-import Card from "./component/Card.jsx";
+import React, { useState, useEffect } from "react";
+import CompanyCard from "./component/Card.jsx";
 import Sidebar from "./component/Sidebar.jsx";
-import initialCompanies from "./data/CompanyData.js"; // import dummy data
+import AddCard from "./component/AddCard.jsx";
 
 function App() {
-  const [companies, setCompanies] = useState(initialCompanies);
-  const [mode, setMode] = useState("dark"); // store theme in App
+  const [companies, setCompanies] = useState([]);
+  const [mode, setMode] = useState("dark");
+  const [currView, setCurrView] = useState("home");
 
-  // function to toggle theme
   const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
+
+  // Fetch companies from backend
+  const fetchCompanies = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/companies"); // exactly this
+      if (!res.ok) throw new Error("Failed to fetch companies");
+      const data = await res.json();
+      setCompanies(data);
+    } catch (err) {
+      console.error("Error fetching companies:", err);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  // Add a new company
+  const handleAddCompany = async (newCompany) => {
+    try {
+      const res = await fetch("http://localhost:3000/addCompany", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCompany),
+      });
+      if (!res.ok) throw new Error("Failed to add company");
+      const savedCompany = await res.json();
+      setCompanies((prev) => [...prev, savedCompany]);
+      setCurrView("home");
+    } catch (err) {
+      console.error("Error adding company:", err);
+    }
+  };
+
+  const handleCancelAdd = () => setCurrView("home");
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${
-        mode === "dark"
-          ? "bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
-          : "bg-gradient-to-br from-gray-100 via-white to-gray-200 text-black"
-      }`}
+      className={`min-h-screen transition-colors duration-500 ${mode === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+        }`}
     >
-      {/* Sidebar gets mode + toggle function */}
-      <Sidebar mode={mode} toggleMode={toggleMode} />
+      <Sidebar
+        mode={mode}
+        toggleMode={toggleMode}
+        CurrView={currView}
+        setCurrview={setCurrView}
+      />
 
-      {/* Main Content Area */}
-      <div className="lg:ml-72">
-        <div className="pt-4 lg:pt-8 px-4 lg:px-8">
-          {/* Cards */}
+      <div className="lg:ml-72 pt-4 lg:pt-8 px-4 lg:px-8">
+        {currView === "home" && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-8">
-            {companies.map((company, index) => (
-              <div key={index} className="w-full">
-                <Card company={company} mode={mode} />
-              </div>
-            ))}
-          </div>
-
-          {/* Empty state */}
-          {companies.length === 0 && (
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div
-                  className={`w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-4 border ${
-                    mode === "dark"
-                      ? "bg-gray-800 border-cyan-500/20"
-                      : "bg-gray-200 border-cyan-500/40"
-                  }`}
-                >
-                  <span className="text-4xl">📋</span>
+            {companies.length > 0 ? (
+              companies.map((company) => (
+                <CompanyCard
+                  key={company._id}
+                  company={company}
+                  mode={mode}
+                />
+              ))
+            ) : (
+              <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                  <div
+                    className={`w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-4 border ${mode === "dark"
+                        ? "bg-gray-800 border-cyan-500/20"
+                        : "bg-gray-200 border-cyan-500/40"
+                      }`}
+                  >
+                    <span className="text-4xl">📋</span>
+                  </div>
+                  <h3
+                    className={`font-mono text-xl font-bold mb-2 ${mode === "dark" ? "text-white" : "text-gray-900"
+                      }`}
+                  >
+                    No Companies Found
+                  </h3>
+                  <p
+                    className={`font-mono text-sm ${mode === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                  >
+                    <span className="text-cyan-400">$</span> Add your first
+                    company to get started
+                  </p>
                 </div>
-                <h3
-                  className={`font-mono text-xl font-bold mb-2 ${
-                    mode === "dark" ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  No Companies Found
-                </h3>
-                <p
-                  className={`font-mono text-sm ${
-                    mode === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  <span className="text-cyan-400">$</span> Add your first company
-                  to get started
-                </p>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
+
+        {currView === "add" && (
+          <AddCard mode={mode} onAdd={handleAddCompany} onCancel={handleCancelAdd} />
+        )}
       </div>
     </div>
   );
