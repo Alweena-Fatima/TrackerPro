@@ -59,6 +59,22 @@ function App() {
   };
 
   const handleCancelAdd = () => setCurrView("home");
+// In your Card.jsx or App.jsx
+const handleDelete = async (company) => {
+  try {
+    const res = await fetch(`http://localhost:3000/companies/${company._id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    // Optionally remove the company from state
+    setCompanies(companies.filter(c => c._id !== company._id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <div
@@ -81,6 +97,7 @@ function App() {
                   key={company._id}
                   company={company}
                   mode={mode}
+                  onDelete={handleDelete}
                 />
               ))
             ) : (
