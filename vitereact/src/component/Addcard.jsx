@@ -23,43 +23,37 @@ function AddCard({ onAdd, onCancel, mode }) {
         if (!formData.company || !formData.role) return;
 
         try {
-            // Send data to backend
             const res = await fetch("http://localhost:3000/addCompany", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
+            const savedCompany = await res.json(); // <-- actual saved company from backend
 
+            if (onAdd) onAdd(savedCompany); // <-- pass the backend object, not formData
 
-            const result = await res.json();
+            // Reset form
+            setFormData({
+                company: "",
+                role: "",
+                location: "",
+                ctc: "",
+                deadline: "",
+                oaDate: "",
+                mode: "Online",
+                interVDate: "",
+                interVMode: "Online"
+            });
 
-            if (result.success) {
-                // Update local state in React
-                if (onAdd) onAdd(formData);
-
-                // Reset form
-                setFormData({
-                    company: "",
-                    role: "",
-                    location: "",
-                    ctc: "",
-                    deadline: "",
-                    oaDate: "",
-                    mode: "Online",
-                    interVDate: "",
-                    interVMode: "Online"
-                });
-
-                alert("Company added successfully!");
-            } else {
-                alert("Error: " + result.message);
-            }
+            // Optional alert
+            alert("Company added successfully!");
         } catch (err) {
             console.error(err);
             alert("Server error. Could not add company.");
         }
     };
+
 
 
     const handleCancel = () => {

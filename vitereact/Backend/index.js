@@ -28,12 +28,12 @@ app.post("/addCompany", async (req, res) => {
     try {
         const newCompany = new Company(req.body);
         const savedCompany = await newCompany.save();
-        res.json(savedCompany);
-        res.redirect("/Home")
+        return res.json(savedCompany);   // ✅ frontend will handle navigation
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
 });
+
 //edit company 
 
 

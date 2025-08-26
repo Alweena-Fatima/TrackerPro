@@ -35,9 +35,23 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newCompany),
       });
+
       if (!res.ok) throw new Error("Failed to add company");
+
       const savedCompany = await res.json();
-      setCompanies((prev) => [...prev, savedCompany]);
+
+      // Ensure the savedCompany has _id
+      if (!savedCompany._id) {
+        // If MongoDB didn't return _id, refetch all companies
+        const fetchRes = await fetch("http://localhost:3000/companies");
+        const companies = await fetchRes.json();
+        setCompanies(companies);
+      } else {
+        // Add the new company directly to state
+        setCompanies((prev) => [...prev, savedCompany]);
+      }
+
+      // Switch back to Home view
       setCurrView("home");
     } catch (err) {
       console.error("Error adding company:", err);
@@ -74,8 +88,8 @@ function App() {
                 <div className="text-center">
                   <div
                     className={`w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-4 border ${mode === "dark"
-                        ? "bg-gray-800 border-cyan-500/20"
-                        : "bg-gray-200 border-cyan-500/40"
+                      ? "bg-gray-800 border-cyan-500/20"
+                      : "bg-gray-200 border-cyan-500/40"
                       }`}
                   >
                     <span className="text-4xl">📋</span>
@@ -100,7 +114,15 @@ function App() {
         )}
 
         {currView === "add" && (
-          <AddCard mode={mode} onAdd={handleAddCompany} onCancel={handleCancelAdd} />
+          <AddCard
+            mode={mode}
+            onAdd={(savedCompany) => {
+              setCompanies((prev) => [...prev, savedCompany]);
+              setCurrView("home");
+            }}
+            onCancel={handleCancelAdd}
+          />
+
         )}
       </div>
     </div>
