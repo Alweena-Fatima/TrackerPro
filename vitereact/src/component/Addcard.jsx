@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 function AddCard({ onAdd, onCancel, mode }) {
+    const [emailText, setEmailText] = useState(''); // <-- Add this line
     const [formData, setFormData] = useState({
         company: "",
         role: "",
@@ -53,6 +54,80 @@ function AddCard({ onAdd, onCancel, mode }) {
             alert("Server error. Could not add company.");
         }
     };
+    const parseAndPopulate = () => {
+    // 1. Initialize an object to hold the extracted data.
+    let extractedData = {};
+    
+    // Clean up the text for easier parsing
+    const normalizedText = emailText.toLowerCase();
+
+     const companyList = [
+      "slb",
+      "dp world",
+      "google",
+      "KKR",
+      "Kohlberg Kravis Roberts & Co.",
+      "KKR & Co. Inc."
+      // add more companies
+    ];
+    let companyName = '';
+    for (const company of companyList) {
+      if (normalizedText.includes(company)) {
+        companyName = company;
+        break;
+      }
+    }
+    extractedData.company = companyName;
+
+    // 3. Try to extract Role
+    // Pattern A: "Job Profile: [role] - [ctc]" (from first example)
+    let roleMatch = normalizedText.match(/profile\s*:\s*([a-z\s-]+)\s*-/);
+    // Pattern B: "Role: [role]" (from second example)
+    if (!roleMatch) {
+      roleMatch = normalizedText.match(/role:\s*([a-z\s-]+)\s*(\(fte\))?/);
+    }
+    extractedData.role = roleMatch ? roleMatch[1].trim() : '';
+
+    // 4. Try to extract Location
+    // Pattern A: "Location: [location]" (from first example)
+    let locationMatch = normalizedText.match(/location\s*:\s*([a-z]+)/);
+    // Pattern B: "Job Locations: [location] / [location]..." (from second example)
+    if (!locationMatch) {
+      locationMatch = normalizedText.match(/job locations:\s*([a-z\s/]+)/);
+    }
+    extractedData.location = locationMatch ? locationMatch[1].trim() : '';
+
+    // 5. Try to extract CTC
+    // Pattern A: " - [ctc]" (after a role) (from first example)
+    let ctcMatch = normalizedText.match(/-\s*([\d.]+lpa)/);
+    // Pattern B: "CTC: ₹[ctc]" (from second example)
+    if (!ctcMatch) {
+      ctcMatch = normalizedText.match(/ctc:\s*₹?([\d,]+)/);
+    }
+    extractedData.ctc = ctcMatch ? ctcMatch[1].replace(',', '') : '';
+
+    // 6. Try to extract Deadline
+    // Pattern A: "Tomorrow (DD/MM/YYYY)" (from first example)
+    let deadlineMatch = normalizedText.match(/\((\d{2}\/\d{2}\/\d{4})\)/);
+    // Pattern B: "DEADLINE : DD Month PM" (from second example)
+    if (!deadlineMatch) {
+      const monthMap = { 'january': '01', 'february': '02', 'march': '03', 'april': '04', 'may': '05', 'june': '06', 'july': '07', 'august': '08', 'september': '09', 'october': '10', 'november': '11', 'december': '12' };
+      const deadlineTextMatch = normalizedText.match(/deadline\s*:\s*(\d{1,2})\s*([a-z]+)\s*(\d{1,2}:\d{2})\s*pm/);
+      if (deadlineTextMatch) {
+        const [, day, month, time] = deadlineTextMatch;
+        const monthNumber = monthMap[month];
+        const [hour, minute] = time.split(':');
+        // Construct a parsable date string
+        extractedData.deadline = `2025-${monthNumber}-${day}T${(parseInt(hour) + 12).toString().padStart(2, '0')}:${minute}`;
+      }
+    } else {
+        // If first pattern matched, convert date
+        extractedData.deadline = new Date(deadlineMatch[1].replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')).toISOString().slice(0, 16);
+    }
+    
+    // 7. Update the formData state with the new values
+    setFormData(prevData => ({ ...prevData, ...extractedData }));
+};
 
 
 
@@ -113,10 +188,28 @@ function AddCard({ onAdd, onCancel, mode }) {
                 ? "hover:shadow-cyan-500/20"
                 : "hover:shadow-blue-500/25"
                 }`}
+
         >
+
             {/* Form container */}
+
             <form onSubmit={handleSubmit} className="relative flex flex-col lg:flex-row min-h-[16rem] lg:min-h-[18rem] ">
                 {/* Left side - Company Logo & Info */}
+                <div className={`p-4 rounded-xl border mb-6 ${inputBg}`}>
+                    <textarea
+                        className={`w-full h-32 p-2 ${inputBg} rounded-md outline-none transition-all duration-200 resize-none`}
+                        placeholder="Paste company email text here to auto-fill"
+                        value={emailText}
+                        onChange={(e) => setEmailText(e.target.value)}
+                    ></textarea>
+                    <button
+                        type="button"
+                        onClick={parseAndPopulate}
+                        className={`mt-3 w-full rounded-md px-4 py-2 font-mono text-sm font-bold transition-all duration-200 ${mode === "dark" ? "bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 border border-cyan-500/30" : "bg-blue-100/80 hover:bg-blue-200/80 text-blue-700 border border-blue-300"}`}
+                    >
+                        Auto-Fill
+                    </button>
+                </div>
                 <div
                     className={`w-full lg:w-56 relative flex items-center justify-center overflow-hidden lg:border-r border-b lg:border-b-0 ${leftPanelBg} min-h-[12rem]`}
                 >
@@ -334,6 +427,7 @@ function AddCard({ onAdd, onCancel, mode }) {
                         </div>
                     </div>
                 </div>
+
             </form>
         </div>
     );

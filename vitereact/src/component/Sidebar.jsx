@@ -17,8 +17,9 @@ function Sidebar({ mode, toggleMode, setCurrview, CurrView }) {
 
 
     // Enhanced colors for light/dark mode
-    const bg = mode === "dark" ? "bg-gray-900" : "bg-gradient-to-br from-blue-50";
-    const text = mode === "dark" ? "text-gray-300" : "text-gray-700";
+    // const bg = mode === "dark" ? "bg-gray-900" : "bg-gradient-to-br from-blue-50";
+    const bg = mode === "dark" ? "bg-gray-700" : "bg-gradient-to-br from-blue-50";
+    const text = mode === "dark" ? "text-grey-100" : "text-black";
     const border = mode === "dark" ? "border-gray-700" : "border-gray-200";
     const headerBg = mode === "dark" ? "bg-gray-800/50" : "bg-white";
     const footerBg = mode === "dark" ? "bg-black/50" : "bg-gray-100";
@@ -69,12 +70,13 @@ function Sidebar({ mode, toggleMode, setCurrview, CurrView }) {
                                 >
                                     <div className="flex items-center space-x-3">
                                         <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
-                                        <div className="font-mono text-sm font-medium font-bold">{item.label}</div>
+                                        <div className="font-mono text-m font-medium font-bold">{item.label}</div>
                                     </div>
                                 </button>
                             );
                         })}
                     </nav>
+                    
 
                     {/* Footer */}
                     <div className={`p-5 border-t ${border}`}>
