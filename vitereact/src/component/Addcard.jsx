@@ -72,7 +72,9 @@ function AddCard({ onAdd, onCancel, mode }) {
             "google",
             "KKR",
             "Kohlberg Kravis Roberts & Co.",
-            "KKR & Co. Inc."
+            "KKR & Co. Inc.",
+            "Visa",
+            "PhonePe"
             // add more companies
         ];
         let companyName = '';
@@ -154,37 +156,48 @@ function AddCard({ onAdd, onCancel, mode }) {
         };
     }, []);
     // Enhanced dynamic colors based on mode
-    const cardBg =
-        mode === "dark"
-            ? "bg-gray-900 border-gray-700 hover:border-cyan-400/60"
-            : "bg-white border-gray-300 hover:border-blue-400/70 shadow-lg";
+    // Enhanced dynamic colors based on mode
+const cardBg =
+  mode === "dark"
+    ? "bg-gray-900 border-gray-700 hover:border-cyan-400/60"
+    : "bg-blue border-gray-300 hover:border-blue-800/70 shadow-lg";
 
-    const textPrimary = mode === "dark" ? "text-white" : "text-gray-800";
-    const textSecondary = mode === "dark" ? "text-gray-400" : "text-gray-500";
+const textPrimary = mode === "dark" ? "text-white" : "text-gray-800";
+const textSecondary = mode === "dark" ? "text-gray-400" : "text-gray-500";
 
-    const leftPanelBg = mode === "dark"
-        ? "bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700"
-        : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-gray-300";
+const leftPanelBg =
+  mode === "dark"
+    ? "bg-gradient-to-br from-gray-750 via-gray-800 to-gray border-gray-700"
+    : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-gray-300";
 
-    const rightPanelBg = mode === "dark"
-        ? "bg-gradient-to-br from-gray-900 to-black"
-        : "bg-gradient-to-br from-white via-gray-50 to-blue-50/30";
+const rightPanelBg =
+  mode === "dark"
+    ? "bg-gradient-to-br from-gray-750 to-black"
+    : "bg-gradient-to-br from-white via-gray-50 to-blue-50/30";
 
-    const logoContainerBg = mode === "dark"
-        ? "bg-black border-cyan-400"
-        : "bg-gradient-to-br from-indigo-600 to-blue-700 border-indigo-500";
+const logoContainerBg =
+  mode === "dark"
+    ? "bg-black border-cyan-400"
+    : "bg-gradient-to-br from-indigo-600 to-blue-700 border-indigo-500";
 
-    const terminalBg = mode === "dark"
-        ? "bg-black/50 border-cyan-500/30"
-        : "bg-gray-800 border-gray-700";
+const terminalBg =
+  mode === "dark" ? "bg-black/50 border-cyan-500/30" : "bg-gray-800 border-gray-700";
 
-    const inputBg = mode === "dark"
-        ? "bg-gray-800/50 border-gray-600 text-white placeholder-gray-500 focus:border-cyan-400 focus:bg-gray-800"
-        : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-blue-50/30";
+const ctcContainerBg =
+  mode === "dark"
+    ? "bg-black border border-cyan-500/40"
+    : "bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300";
 
-    const selectBg = mode === "dark"
-        ? "bg-gray-800/50 border-gray-600 text-white focus:border-cyan-400"
-        : "bg-white border-gray-300 text-gray-900 focus:border-blue-500";
+const inputBg =
+  mode === "dark"
+    ? "bg-gray-800/50 border-gray-600 text-white placeholder-gray-500 focus:border-cyan-400 focus:bg-gray-800"
+    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-blue-50/30";
+
+const selectBg =
+  mode === "dark"
+    ? "bg-gray-800/50 border-gray-600 text-white focus:border-cyan-400"
+    : "bg-white border-gray-300 text-gray-900 focus:border-blue-500";
+
 
 
     return (
