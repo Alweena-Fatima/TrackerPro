@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect DB
+// Connect DB connecting atlas 
 mongoose.connect('mongodb+srv://alweenacse_db_user:REMOVED_SECRET@companycluster.cptw0lz.mongodb.net/?retryWrites=true&w=majority&appName=CompanyCluster')
     .then(() => console.log("Database connected"))
     .catch(err => console.log(err));
