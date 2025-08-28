@@ -1,10 +1,27 @@
 import mongoose from "mongoose";
 
 const companySchema = new mongoose.Schema({
-  company: String,
-  role: String,
-  location: String,
-  ctc: String,
+   userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+  company: {
+    type:String,
+    required:[true, "Company is Required"]
+  },
+  role: {
+    type:String,
+    required:[true, "Role is Required"]
+  },
+  location: {
+    type:String,
+    required:[true, "Loaction is Required"]
+  },
+  ctc: {
+    type:String,
+    required:[true, "CTC is Required"]
+  },
   deadline: {
     type: Date,
     default: () => {
@@ -17,8 +34,14 @@ const companySchema = new mongoose.Schema({
   mode: String,
   interVDate: Date,
   interVMode: String,
-});
-
+},{
+    timestamps: true
+}
+);
+// Index for faster queries
+companySchema.index({ userId: 1 });
+companySchema.index({ company: 1 });
+companySchema.index({ deadline: 1 });
 const Company = mongoose.model("Company", companySchema);
 
 export default Company;

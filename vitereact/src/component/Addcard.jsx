@@ -29,41 +29,64 @@ function AddCard({ onAdd, onCancel, mode }) {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault();
 
-        if (!formData.company || !formData.role) return;
+        if (!formData.company || !formData.role) {
+            alert("Company and Role are required.");
+            return;
+        }
 
-        try {
-            const res = await fetch("http://localhost:3000/addCompany", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-
-            const savedCompany = await res.json(); // <-- actual saved company from backend
-
-            if (onAdd) onAdd(savedCompany); // <-- pass the backend object, not formData
-
-            // Reset form
-            setFormData({
-                company: "",
-                role: "",
-                location: "",
-                ctc: "",
-                deadline: "",
-                oaDate: "",
-                mode: "Online",
-                interVDate: "",
-                interVMode: "Online"
-            });
-
-            // Optional alert
-            alert("Company added successfully!");
-        } catch (err) {
-            console.error(err);
-            alert("Server error. Could not add company.");
+        // Get the JWT token from local storage
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("You must be logged in to add a company.");
+            return;
         }
-    };
+
+        // Create a copy of formData to modify before sending
+        const dataToSend = { ...formData };
+        if (!dataToSend.oaDate) dataToSend.oaDate = null;
+        if (!dataToSend.interVDate) dataToSend.interVDate = null;
+        
+        try {
+            const res = await fetch("http://localhost:3000/addCompany", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` // Add the JWT token
+                },
+                body: JSON.stringify(dataToSend), // Send the modified data
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                alert(`Error: ${errorData.message}`);
+                console.error(errorData);
+                return;
+            }
+
+            const savedCompany = await res.json(); 
+            if (onAdd) onAdd(savedCompany); 
+
+            // Reset form after successful submission
+            setFormData({
+                company: "",
+                role: "",
+                location: "",
+                ctc: "",
+                deadline: getTodayEODLocal(),
+                oaDate: "",
+                mode: "",
+                interVDate: "",
+                interVMode: ""
+            });
+
+            alert("Company added successfully!");
+        } catch (err) {
+            console.error(err);
+            alert("Server error. Could not add company. Make sure the server is running.");
+        }
+    };
     const parseAndPopulate = () => {
         // 1. Initialize an object to hold the extracted data.
         let extractedData = {};
