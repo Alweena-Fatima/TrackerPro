@@ -28,64 +28,36 @@ function AddCard({ onAdd, onCancel, mode }) {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.company || !formData.role) {
             alert("Company and Role are required.");
             return;
         }
-
-        // Get the JWT token from local storage
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("You must be logged in to add a company.");
-            return;
-        }
-
-        // Create a copy of formData to modify before sending
-        const dataToSend = { ...formData };
-        if (!dataToSend.oaDate) dataToSend.oaDate = null;
-        if (!dataToSend.interVDate) dataToSend.interVDate = null;
         
-        try {
-            const res = await fetch("http://localhost:3000/addCompany", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}` // Add the JWT token
-                },
-                body: JSON.stringify(dataToSend), // Send the modified data
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                alert(`Error: ${errorData.message}`);
-                console.error(errorData);
-                return;
-            }
-
-            const savedCompany = await res.json(); 
-            if (onAdd) onAdd(savedCompany); 
-
-            // Reset form after successful submission
-            setFormData({
-                company: "",
-                role: "",
-                location: "",
-                ctc: "",
-                deadline: getTodayEODLocal(),
-                oaDate: "",
-                mode: "",
-                interVDate: "",
-                interVMode: ""
-            });
-
-            alert("Company added successfully!");
-        } catch (err) {
-            console.error(err);
-            alert("Server error. Could not add company. Make sure the server is running.");
+        // Create a copy of formData to modify before sending
+        const dataToSend = { ...formData };
+        if (!dataToSend.oaDate) dataToSend.oaDate = null;
+        if (!dataToSend.interVDate) dataToSend.interVDate = null;
+        
+        // Call the parent's onAdd function with the cleaned data
+        if (onAdd) {
+            await onAdd(dataToSend); // Await the onAdd call
         }
+
+        // Reset form after successful submission
+        setFormData({
+            company: "",
+            role: "",
+            location: "",
+            ctc: "",
+            deadline: getTodayEODLocal(),
+            oaDate: "",
+            mode: "",
+            interVDate: "",
+            interVMode: ""
+        });
     };
     const parseAndPopulate = () => {
         // 1. Initialize an object to hold the extracted data.

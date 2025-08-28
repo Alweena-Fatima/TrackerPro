@@ -4,6 +4,7 @@ import CompanyCard from "./component/Card.jsx";
 import Sidebar from "./component/Sidebar.jsx";
 import AddCard from "./component/AddCard.jsx";
 import UserAuth from "./component/User.jsx";
+import AboutMe from "./component/AboutMe.jsx";
 
 function App() {
   const [companies, setCompanies] = useState([]);
@@ -11,7 +12,7 @@ function App() {
   const [currView, setCurrView] = useState("home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null); // State to hold user object
+  const [user, setUser] = useState(null);
 
   const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
 
@@ -20,7 +21,7 @@ function App() {
     const storedUser = localStorage.getItem('user');
     if (token && storedUser) {
       setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser)); // Set user state from local storage
+      setUser(JSON.parse(storedUser));
       fetchCompanies();
     } else {
       setLoading(false);
@@ -50,7 +51,7 @@ function App() {
       if (!res.ok) {
         if (res.status === 401) {
             localStorage.removeItem('token');
-            localStorage.removeItem('user'); // Also remove user data
+            localStorage.removeItem('user');
             setIsAuthenticated(false);
             setUser(null);
             setCurrView('user');
@@ -71,14 +72,15 @@ function App() {
   };
 
   const handleLoginSuccess = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData)); // Store user data
+    localStorage.setItem('user', JSON.stringify(userData));
     setIsAuthenticated(true);
     setUser(userData);
     setCurrView('home');
     fetchCompanies();
   };
 
-  const handleAddCompany = async (newCompany) => {
+  // The corrected handleAddCompany function
+  const handleAddCompany = async (newCompanyData) => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
@@ -89,19 +91,22 @@ function App() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(newCompany),
+        body: JSON.stringify(newCompanyData),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add company");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to add company");
       }
 
       const savedCompany = await res.json();
-      setCompanies((prev) => [...prev, savedCompany]);
-      setCurrView("home");
+      setCompanies((prev) => [...prev, savedCompany]); // Add the new company to state
+      setCurrView("home"); // Redirect to home page
+      alert("Company added successfully!");
 
     } catch (err) {
       console.error("Error adding company:", err);
+      alert("Error adding company. Please try again.");
     }
   };
 
@@ -119,14 +124,17 @@ function App() {
         },
       });
 
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Delete failed");
+      }
 
       setCompanies(companies.filter(c => c._id !== company._id));
     } catch (err) {
       console.error(err);
     }
   };
-  const handlelogout=()=>{
+   const handlelogout=()=>{
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     //reset all authenetication state so that after logout everything will go as unlogin
@@ -141,11 +149,10 @@ function App() {
       <Sidebar
         mode={mode}
         toggleMode={toggleMode}
-        CurrView={currView}
+        currView={currView}
         setCurrview={setCurrView}
         isAuthenticated={isAuthenticated}
-        // Pass the user ID or a default value
-        userid={user?.userid || "Guest"} 
+        userid={user?.userid || "Guest"}
         onLogout={handlelogout}
       />
       
@@ -188,11 +195,12 @@ function App() {
             {currView === "add" && (
               <AddCard
                 mode={mode}
-                onAdd={handleAddCompany}
+                onAdd={handleAddCompany} // Pass the function reference here
                 onCancel={handleCancelAdd}
               />
             )}
             {currView === "user" && <UserAuth mode={mode} onLoginSuccess={handleLoginSuccess} />}
+            {currView==="about" && <AboutMe mode={mode}></AboutMe>}
           </>
         )}
       </div>

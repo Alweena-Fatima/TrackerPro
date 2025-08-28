@@ -30,7 +30,7 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
         { id: "user", label: "Login / Signup", icon: User },
         { id: "about", label: "README.md", icon: Info },
     ];
-    
+
     // Choose the correct set of menu items
     const menuItems = isAuthenticated ? loggedInMenuItems : loggedOutMenuItems;
 
@@ -52,27 +52,28 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                             </div>
                         </div>
                     </div>
-                    
-                    {/* User Info Section (Conditional) */}
-                    <div className={`flex items-center space-x-4 p-4 rounded-lg border m-4 ${mode === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"} shadow-inner`}>
-                        <div className="flex-shrink-0">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl ${mode === "dark" ? "bg-blue-900 text-blue-400" : "bg-blue-200 text-blue-800"}`}>
-                                {isAuthenticated && userid ? userid.charAt(0).toUpperCase() : 'U'}
-                            </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className={`font-mono text-xs ${mode === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-                                {isAuthenticated ? "Logged in as:" : "Status:"}
-                            </p>
-                            <p className={`font-mono font-bold truncate ${mode === "dark" ? "text-white" : "text-gray-900"}`}>
-                                {isAuthenticated && userid ? userid : "Guest"}
-                            </p>
-                        </div>
-                    </div>
+
+
 
 
                     {/* Navigation */}
                     <nav className="flex-1 p-6 space-y-3">
+                        {/* User Info Section (Conditional) */}
+                        <div className={`flex items-center space-x-4 p-4 rounded-lg border  ${mode === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"} shadow-inner`}>
+                            <div className="flex-shrink-0">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl ${mode === "dark" ? "bg-blue-900 text-blue-400" : "bg-blue-200 text-blue-800"}`}>
+                                    {isAuthenticated && userid ? userid.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className={`font-mono text-xs ${mode === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                                    {isAuthenticated ? "Logged in as:" : "Status:"}
+                                </p>
+                                <p className={`font-mono font-bold truncate ${mode === "dark" ? "text-white" : "text-gray-900"}`}>
+                                    {isAuthenticated && userid ? userid : "Guest"}
+                                </p>
+                            </div>
+                        </div>
                         {menuItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = currView === item.id;
@@ -81,12 +82,12 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                                     key={item.id}
                                     onClick={() => handleItemClick(item.id)}
                                     className={`w-full text-left p-4 rounded-xl transition-all duration-300 group ${isActive
-                                            ? mode === "dark"
-                                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
-                                                : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-md"
-                                            : mode === "dark"
-                                                ? "bg-gray-800/50 text-gray-400 border border-gray-700 hover:bg-gray-700/50 hover:text-gray-300"
-                                                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300 shadow-sm"
+                                        ? mode === "dark"
+                                            ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
+                                            : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-md"
+                                        : mode === "dark"
+                                            ? "bg-gray-800/50 text-gray-400 border border-gray-700 hover:bg-gray-700/50 hover:text-gray-300"
+                                            : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300 shadow-sm"
                                         }`}
                                 >
                                     <div className="flex items-center space-x-3">
@@ -119,8 +120,8 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                                     <button
                                         onClick={toggleMode}
                                         className={`p-1 rounded-md transition-all duration-300 ${mode === "dark"
-                                                ? "hover:bg-yellow-400/20 text-yellow-400"
-                                                : "hover:bg-gray-200 text-gray-600"
+                                            ? "hover:bg-yellow-400/20 text-yellow-400"
+                                            : "hover:bg-gray-200 text-gray-600"
                                             }`}
                                     >
                                         {mode === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -149,8 +150,8 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                         <button
                             onClick={toggleMode}
                             className={`p-2 rounded-lg transition-all duration-300 ${mode === "dark"
-                                    ? "hover:bg-yellow-400/20 text-yellow-400"
-                                    : "hover:bg-gray-200 text-gray-600"
+                                ? "hover:bg-yellow-400/20 text-yellow-400"
+                                : "hover:bg-gray-200 text-gray-600"
                                 }`}
                         >
                             {mode === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -158,8 +159,8 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                         <button
                             onClick={toggleMobileMenu}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 ${mode === "dark"
-                                    ? "bg-cyan-900/20 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/40"
-                                    : "bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200"
+                                ? "bg-cyan-900/20 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/40"
+                                : "bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200"
                                 }`}
                         >
                             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -170,6 +171,22 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                 {isMobileMenuOpen && (
                     <div className={`border-t ${border} ${bg} backdrop-blur-sm shadow-lg`}>
                         <div className="p-4 space-y-2">
+                            {/* User Info Section (Conditional) */}
+                            <div className={`flex items-center space-x-4 p-4 rounded-lg border  ${mode === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"} shadow-inner`}>
+                                <div className="flex-shrink-0">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl ${mode === "dark" ? "bg-blue-900 text-blue-400" : "bg-blue-200 text-blue-800"}`}>
+                                        {isAuthenticated && userid ? userid.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className={`font-mono text-xs ${mode === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                                        {isAuthenticated ? "Logged in as:" : "Status:"}
+                                    </p>
+                                    <p className={`font-mono font-bold truncate ${mode === "dark" ? "text-white" : "text-gray-900"}`}>
+                                        {isAuthenticated && userid ? userid : "Guest"}
+                                    </p>
+                                </div>
+                            </div>
                             {menuItems.map((item) => {
                                 const Icon = item.icon;
                                 const isActive = currView === item.id;
@@ -178,12 +195,12 @@ function Sidebar({ mode, toggleMode, setCurrview, currView, isAuthenticated, onL
                                         key={item.id}
                                         onClick={() => handleItemClick(item.id)}
                                         className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${isActive
-                                                ? mode === "dark"
-                                                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                                                    : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm"
-                                                : mode === "dark"
-                                                    ? "bg-gray-800/50 text-gray-400 border border-gray-700 hover:bg-gray-700/50"
-                                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 shadow-sm"
+                                            ? mode === "dark"
+                                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                                                : "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm"
+                                            : mode === "dark"
+                                                ? "bg-gray-800/50 text-gray-400 border border-gray-700 hover:bg-gray-700/50"
+                                                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 shadow-sm"
                                             }`}
                                     >
                                         <div className="flex items-center space-x-3">
