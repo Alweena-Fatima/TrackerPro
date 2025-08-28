@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
+const getTodayEODLocal = () => {
+  const today = new Date();
+  today.setHours(23, 59, 59, 0); // local time EOD
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  const hours = String(today.getHours()).padStart(2, "0");
+  const minutes = String(today.getMinutes()).padStart(2, "0");
 
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 function AddCard({ onAdd, onCancel, mode }) {
     const [emailText, setEmailText] = useState(''); // <-- Add this line
     const [formData, setFormData] = useState({
@@ -7,11 +17,11 @@ function AddCard({ onAdd, onCancel, mode }) {
         role: "",
         location: "",
         ctc: "",
-        deadline: "",
+        deadline: getTodayEODLocal(),
         oaDate: "",
-        mode: "Online",
+        mode: "",
         interVDate: "",
-        interVMode: "Online"
+        interVMode: ""
     });
 
     const handleChange = (field, value) => {
@@ -55,79 +65,79 @@ function AddCard({ onAdd, onCancel, mode }) {
         }
     };
     const parseAndPopulate = () => {
-    // 1. Initialize an object to hold the extracted data.
-    let extractedData = {};
-    
-    // Clean up the text for easier parsing
-    const normalizedText = emailText.toLowerCase();
+        // 1. Initialize an object to hold the extracted data.
+        let extractedData = {};
 
-     const companyList = [
-      "slb",
-      "dp world",
-      "google",
-      "KKR",
-      "Kohlberg Kravis Roberts & Co.",
-      "KKR & Co. Inc."
-      // add more companies
-    ];
-    let companyName = '';
-    for (const company of companyList) {
-      if (normalizedText.includes(company)) {
-        companyName = company;
-        break;
-      }
-    }
-    extractedData.company = companyName;
+        // Clean up the text for easier parsing
+        const normalizedText = emailText.toLowerCase();
 
-    // 3. Try to extract Role
-    // Pattern A: "Job Profile: [role] - [ctc]" (from first example)
-    let roleMatch = normalizedText.match(/profile\s*:\s*([a-z\s-]+)\s*-/);
-    // Pattern B: "Role: [role]" (from second example)
-    if (!roleMatch) {
-      roleMatch = normalizedText.match(/role:\s*([a-z\s-]+)\s*(\(fte\))?/);
-    }
-    extractedData.role = roleMatch ? roleMatch[1].trim() : '';
+        const companyList = [
+            "slb",
+            "dp world",
+            "google",
+            "KKR",
+            "Kohlberg Kravis Roberts & Co.",
+            "KKR & Co. Inc."
+            // add more companies
+        ];
+        let companyName = '';
+        for (const company of companyList) {
+            if (normalizedText.includes(company)) {
+                companyName = company;
+                break;
+            }
+        }
+        extractedData.company = companyName;
 
-    // 4. Try to extract Location
-    // Pattern A: "Location: [location]" (from first example)
-    let locationMatch = normalizedText.match(/location\s*:\s*([a-z]+)/);
-    // Pattern B: "Job Locations: [location] / [location]..." (from second example)
-    if (!locationMatch) {
-      locationMatch = normalizedText.match(/job locations:\s*([a-z\s/]+)/);
-    }
-    extractedData.location = locationMatch ? locationMatch[1].trim() : '';
+        // 3. Try to extract Role
+        // Pattern A: "Job Profile: [role] - [ctc]" (from first example)
+        let roleMatch = normalizedText.match(/profile\s*:\s*([a-z\s-]+)\s*-/);
+        // Pattern B: "Role: [role]" (from second example)
+        if (!roleMatch) {
+            roleMatch = normalizedText.match(/role:\s*([a-z\s-]+)\s*(\(fte\))?/);
+        }
+        extractedData.role = roleMatch ? roleMatch[1].trim() : '';
 
-    // 5. Try to extract CTC
-    // Pattern A: " - [ctc]" (after a role) (from first example)
-    let ctcMatch = normalizedText.match(/-\s*([\d.]+lpa)/);
-    // Pattern B: "CTC: ₹[ctc]" (from second example)
-    if (!ctcMatch) {
-      ctcMatch = normalizedText.match(/ctc:\s*₹?([\d,]+)/);
-    }
-    extractedData.ctc = ctcMatch ? ctcMatch[1].replace(',', '') : '';
+        // 4. Try to extract Location
+        // Pattern A: "Location: [location]" (from first example)
+        let locationMatch = normalizedText.match(/location\s*:\s*([a-z]+)/);
+        // Pattern B: "Job Locations: [location] / [location]..." (from second example)
+        if (!locationMatch) {
+            locationMatch = normalizedText.match(/job locations:\s*([a-z\s/]+)/);
+        }
+        extractedData.location = locationMatch ? locationMatch[1].trim() : '';
 
-    // 6. Try to extract Deadline
-    // Pattern A: "Tomorrow (DD/MM/YYYY)" (from first example)
-    let deadlineMatch = normalizedText.match(/\((\d{2}\/\d{2}\/\d{4})\)/);
-    // Pattern B: "DEADLINE : DD Month PM" (from second example)
-    if (!deadlineMatch) {
-      const monthMap = { 'january': '01', 'february': '02', 'march': '03', 'april': '04', 'may': '05', 'june': '06', 'july': '07', 'august': '08', 'september': '09', 'october': '10', 'november': '11', 'december': '12' };
-      const deadlineTextMatch = normalizedText.match(/deadline\s*:\s*(\d{1,2})\s*([a-z]+)\s*(\d{1,2}:\d{2})\s*pm/);
-      if (deadlineTextMatch) {
-        const [, day, month, time] = deadlineTextMatch;
-        const monthNumber = monthMap[month];
-        const [hour, minute] = time.split(':');
-        // Construct a parsable date string
-        extractedData.deadline = `2025-${monthNumber}-${day}T${(parseInt(hour) + 12).toString().padStart(2, '0')}:${minute}`;
-      }
-    } else {
-        // If first pattern matched, convert date
-        extractedData.deadline = new Date(deadlineMatch[1].replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')).toISOString().slice(0, 16);
-    }
-    
-    // 7. Update the formData state with the new values
-    setFormData(prevData => ({ ...prevData, ...extractedData }));
-};
+        // 5. Try to extract CTC
+        // Pattern A: " - [ctc]" (after a role) (from first example)
+        let ctcMatch = normalizedText.match(/-\s*([\d.]+lpa)/);
+        // Pattern B: "CTC: ₹[ctc]" (from second example)
+        if (!ctcMatch) {
+            ctcMatch = normalizedText.match(/ctc:\s*₹?([\d,]+)/);
+        }
+        extractedData.ctc = ctcMatch ? ctcMatch[1].replace(',', '') : '';
+
+        // 6. Try to extract Deadline
+        // Pattern A: "Tomorrow (DD/MM/YYYY)" (from first example)
+        let deadlineMatch = normalizedText.match(/\((\d{2}\/\d{2}\/\d{4})\)/);
+        // Pattern B: "DEADLINE : DD Month PM" (from second example)
+        if (!deadlineMatch) {
+            const monthMap = { 'january': '01', 'february': '02', 'march': '03', 'april': '04', 'may': '05', 'june': '06', 'july': '07', 'august': '08', 'september': '09', 'october': '10', 'november': '11', 'december': '12' };
+            const deadlineTextMatch = normalizedText.match(/deadline\s*:\s*(\d{1,2})\s*([a-z]+)\s*(\d{1,2}:\d{2})\s*pm/);
+            if (deadlineTextMatch) {
+                const [, day, month, time] = deadlineTextMatch;
+                const monthNumber = monthMap[month];
+                const [hour, minute] = time.split(':');
+                // Construct a parsable date string
+                extractedData.deadline = `2025-${monthNumber}-${day}T${(parseInt(hour) + 12).toString().padStart(2, '0')}:${minute}`;
+            }
+        } else {
+            // If first pattern matched, convert date
+            extractedData.deadline = new Date(deadlineMatch[1].replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')).toISOString().slice(0, 16);
+        }
+
+        // 7. Update the formData state with the new values
+        setFormData(prevData => ({ ...prevData, ...extractedData }));
+    };
 
 
 
@@ -363,6 +373,7 @@ function AddCard({ onAdd, onCancel, mode }) {
                                 value={formData.deadline}
                                 onChange={(e) => handleChange("deadline", e.target.value)}
                                 className={`w-full font-mono text-sm font-bold rounded-md px-3 py-2 border transition-all duration-200 ${inputBg}`}
+                                
                             />
                         </div>
 
@@ -387,6 +398,7 @@ function AddCard({ onAdd, onCancel, mode }) {
                                     onChange={(e) => handleChange("mode", e.target.value)}
                                     className={`w-full font-mono text-xs px-2 py-1 rounded border transition-all duration-200 ${selectBg}`}
                                 >
+                                    <option value="" disabled hidden>Choose Mode</option>
                                     <option value="Online">Online</option>
                                     <option value="Offline">Offline</option>
                                     <option value="Hybrid">Hybrid</option>
@@ -418,6 +430,10 @@ function AddCard({ onAdd, onCancel, mode }) {
                                         onChange={(e) => handleChange("interVMode", e.target.value)}
                                         className={`w-full font-mono text-xs px-3 py-2 rounded border transition-all duration-200 ${selectBg}`}
                                     >
+                                        {/* Placeholder option */}
+                                        <option value="" disabled>
+                                            Choose Mode
+                                        </option>
                                         <option value="Online">Online</option>
                                         <option value="Offline">Offline</option>
                                         <option value="Hybrid">Hybrid</option>

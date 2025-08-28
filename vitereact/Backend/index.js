@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect DB
-mongoose.connect('mongodb://127.0.0.1:27017/CompanyCrud')
+mongoose.connect('mongodb+srv://alweenacse_db_user:REMOVED_SECRET@companycluster.cptw0lz.mongodb.net/?retryWrites=true&w=majority&appName=CompanyCluster')
     .then(() => console.log("Database connected"))
     .catch(err => console.log(err));
 //home 

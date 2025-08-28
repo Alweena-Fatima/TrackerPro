@@ -227,7 +227,7 @@ function CompanyCard({ company, onDelete, onEdit, mode }) {
               </div>
               <div className="flex justify-between items-center">
                 <span className={`font-mono text-m font-bold ${textPrimary}`}>
-                  {new Date(company.oaDate).toLocaleString()}
+                   {company.oaDate ? new Date(company.oaDate).toLocaleString() : "Not mentioned"}
                 </span>
                 <span
                   className={`font-mono text-s px-2 py-1 rounded ${mode === "dark"
@@ -235,7 +235,7 @@ function CompanyCard({ company, onDelete, onEdit, mode }) {
                       : "text-blue-800 bg-blue-100 border border-blue-400"
                     }`}
                 >
-                  {company.mode}
+                  {company.mode? company.mode: "NA"}
                 </span>
               </div>
             </div>
@@ -252,7 +252,7 @@ function CompanyCard({ company, onDelete, onEdit, mode }) {
                     INTERVIEW
                   </div>
                   <span className={`font-mono text-m font-bold ${textPrimary}`}>
-                    {new Date(company.interVDate).toLocaleString()}
+                    {company.interVDate ? new Date(company.interVDate).toLocaleString() : "Not mentioned"}
                   </span>
                 </div>
                 <div
@@ -261,7 +261,7 @@ function CompanyCard({ company, onDelete, onEdit, mode }) {
                       : "text-emerald-800 bg-emerald-100 border-emerald-400"
                     }`}
                 >
-                  {company.interVMode}
+                  {company.interVMode ? company.interVMode : "NA"}
                 </div>
               </div>
             </div>
