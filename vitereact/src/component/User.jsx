@@ -1,6 +1,6 @@
 // UserAuth.jsx
-// Pass onLoginSuccess as a prop
-import React,{useState} from "react"
+import React, { useState } from "react";
+
 function UserAuth({ mode = "dark", onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -31,16 +31,16 @@ function UserAuth({ mode = "dark", onLoginSuccess }) {
       const result = await res.json();
       
       if (res.ok) {
-        // --- THIS IS THE CRITICAL ADDITION ---
-        if (result.token) {
+        if (result.token && result.user) {
           localStorage.setItem('token', result.token);
-          // Call the parent's success handler
+          // Store the user object as a JSON string
+          localStorage.setItem('user', JSON.stringify(result.user));
+          
           if (onLoginSuccess) {
-            onLoginSuccess(result.user);
+            onLoginSuccess(result.user); // Pass the user object to the parent
           }
         }
         alert(`${isLogin ? 'Login' : 'Signup'} successful!`);
-        // Reset form
         setFormData({ userid: "", password: "" });
       } else {
         alert(result.message || `${isLogin ? 'Login' : 'Signup'} failed`);
@@ -50,10 +50,11 @@ function UserAuth({ mode = "dark", onLoginSuccess }) {
       alert("Server error. Please try again.");
     }
   };
-    const toggleMode = () => {
-        setIsLogin(!isLogin);
-        setFormData({ userid: "", password: "" });
-    };
+  
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setFormData({ userid: "", password: "" });
+  };
 
     // Enhanced dynamic colors based on mode
     const cardBg = mode === "dark"

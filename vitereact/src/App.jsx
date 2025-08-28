@@ -1,3 +1,4 @@
+// App.jsx
 import React, { useState, useEffect } from "react";
 import CompanyCard from "./component/Card.jsx";
 import Sidebar from "./component/Sidebar.jsx";
@@ -10,14 +11,16 @@ function App() {
   const [currView, setCurrView] = useState("home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+  const [user, setUser] = useState(null); // State to hold user object
 
   const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser)); // Set user state from local storage
       fetchCompanies();
     } else {
       setLoading(false);
@@ -47,7 +50,9 @@ function App() {
       if (!res.ok) {
         if (res.status === 401) {
             localStorage.removeItem('token');
+            localStorage.removeItem('user'); // Also remove user data
             setIsAuthenticated(false);
+            setUser(null);
             setCurrView('user');
             alert('Your session has expired. Please log in again.');
             return;
@@ -65,8 +70,10 @@ function App() {
     }
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData)); // Store user data
     setIsAuthenticated(true);
+    setUser(userData);
     setCurrView('home');
     fetchCompanies();
   };
@@ -119,6 +126,15 @@ function App() {
       console.error(err);
     }
   };
+  const handlelogout=()=>{
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    //reset all authenetication state so that after logout everything will go as unlogin
+    setIsAuthenticated(false);
+    setUser(null);//that means no user is loggedin send it to side bar
+     setCompanies([]); // Clear the companies from the previous user
+   setCurrView('user'); // Redirect to the login/signup page
+  }
 
   return (
     <div className={`min-h-screen transition-colors duration-500 ${mode === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
@@ -127,6 +143,10 @@ function App() {
         toggleMode={toggleMode}
         CurrView={currView}
         setCurrview={setCurrView}
+        isAuthenticated={isAuthenticated}
+        // Pass the user ID or a default value
+        userid={user?.userid || "Guest"} 
+        onLogout={handlelogout}
       />
       
       <div className="lg:ml-72 pt-4 lg:pt-8 px-4 lg:px-8">
