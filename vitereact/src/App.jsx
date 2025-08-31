@@ -8,7 +8,7 @@ import AboutMe from "./component/AboutMe.jsx";
 
 function App() {
   const [companies, setCompanies] = useState([]);
-  const [mode, setMode] = useState("dark");
+  const [mode, setMode] = useState("light");
   const [currView, setCurrView] = useState("home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
