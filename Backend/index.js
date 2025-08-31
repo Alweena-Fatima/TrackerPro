@@ -1,5 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
 import Company from "./model/form.model.js";
 import User from "./model/user.model.js";
 import cors from "cors";
@@ -26,10 +28,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-here-change-in-pro
 
 // Database Connection
 // Connect to the MongoDB Atlas cluster
-mongoose.connect('mongodb+srv://alweenacse_db_user:REMOVED_SECRET@companycluster.cptw0lz.mongodb.net/?retryWrites=true&w=majority&appName=CompanyCluster')
-    .then(() => console.log("Database connected successfully"))
-    .catch(err => console.log("Database connection error:", err));
+const PORT = process.env.PORT || 3000;
 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("Database connected successfully"))
+  .catch(err => console.log("Database connection error:", err));
 // ====================================================================
 // AUTHENTICATION ROUTES
 // ====================================================================
