@@ -18,6 +18,8 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.541.0",
     "mongoose": "^8.18.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.6",
     "react": "^19.1.1",
     "react-datepicker": "^8.7.0",
     "react-dom": "^19.1.1"

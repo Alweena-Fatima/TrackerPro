@@ -1,161 +1,178 @@
 import React, { useState, useEffect } from "react";
+
+// Ek helper function jo current date ko end-of-day (EOD) ke saath set karta hai.
+// Yeh deadline field ke liye ek default value deta hai.
 const getTodayEODLocal = () => {
   const today = new Date();
-  today.setHours(23, 59, 59, 0); // local time EOD
+  today.setHours(23, 59, 59, 0); // Time ko 11:59:59 PM par set karta hai.
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const day = String(today.getDate()).padStart(2, "0");
   const hours = String(today.getHours()).padStart(2, "0");
   const minutes = String(today.getMinutes()).padStart(2, "0");
-
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
-function AddCard({ onAdd, onCancel, mode }) {
-    const [emailText, setEmailText] = useState(''); // <-- Add this line
-    const [formData, setFormData] = useState({
-        company: "",
-        role: "",
-        location: "",
-        ctc: "",
-        deadline: getTodayEODLocal(),
-        oaDate: "",
-        mode: "",
-        interVDate: "",
-        interVMode: ""
+
+// Yeh component naya company add karne ya existing company ko edit karne ke liye hai.
+// Isko props milte hain jaise save karne, cancel karne, theme mode, aur editing ke liye company data.
+function AddCard({ onAdd, onCancel, mode, editingCompany }) {
+  // State for raw text jo user auto-fill ke liye paste karta hai.
+  const [emailText, setEmailText] = useState('');
+  // Form ke data ke liye state, default values ke saath.
+  const [formData, setFormData] = useState({
+    company: "",
+    role: "",
+    location: "",
+    ctc: "",
+    deadline: getTodayEODLocal(), // Deadline ko default roop se end-of-day par set karta hai.
+    oaDate: "",
+    mode: "",
+    interVDate: "",
+    interVMode: ""
+  });
+
+  // Yeh useEffect hook form ko pre-fill karne ke liye hai jab `editingCompany` prop change hota hai.
+  // Isi se component 'add' mode se 'edit' mode mein switch hota hai.
+  useEffect(() => {
+    if (editingCompany) {
+      // Direct props ko modify na karne ke liye, ek naya object banate hain.
+      const formattedData = {
+        ...editingCompany,
+        // Backend se aane wale date strings ko `datetime-local` input ke format mein convert karte hain.
+        deadline: editingCompany.deadline ? new Date(editingCompany.deadline).toISOString().slice(0, 16) : getTodayEODLocal(),
+        oaDate: editingCompany.oaDate ? new Date(editingCompany.oaDate).toISOString().slice(0, 16) : "",
+        interVDate: editingCompany.interVDate ? new Date(editingCompany.interVDate).toISOString().slice(0, 16) : "",
+      };
+      setFormData(formattedData);
+    }
+  }, [editingCompany]); // Yeh hook tab run hota hai jab `editingCompany` prop update hota hai.
+
+  // Yeh useEffect hook calendar icon ke liye CSS style inject karne ke liye hai.
+  // Yeh ek side effect hai jo DOM ko modify karta hai.
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+          filter: invert(55%) sepia(100%) saturate(500%) hue-rotate(160deg);
+          cursor: pointer;
+      }
+    `;
+    document.head.appendChild(style);
+    // Jab component unmount hota hai, toh style ko remove karne ke liye cleanup function.
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []); // Empty dependency array ka matlab yeh sirf ek baar run hota hai jab component mount hota hai.
+
+  // Sabhi form inputs ke changes ko handle karne ke liye function.
+  // Yeh `formData` state mein sahi field ko update karta hai.
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Form submit karne par chalta hai.
+  // Yeh data ko taiyar karta hai aur parent ke `onAdd` prop ko call karta hai.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.company || !formData.role) {
+      alert("Company aur Role zaroori hain.");
+      return;
+    }
+    
+    // `formData` ki ek copy banate hain taaki direct state mutation se bacha ja sake.
+    const dataToSend = { ...formData };
+    // Agar hum 'edit' mode mein hain, toh company ki unique ID (`_id`) ko data mein jor dete hain.
+    if (editingCompany) {
+      dataToSend._id = editingCompany._id;
+    }
+
+    // Khali date strings ko `null` mein convert karte hain, jo backend schema ke saath match karta hai.
+    if (!dataToSend.oaDate) dataToSend.oaDate = null;
+    if (!dataToSend.interVDate) dataToSend.interVDate = null;
+    
+    // Parent component ki `onAdd` function ko call karte hain processed data ke saath.
+    if (onAdd) {
+      await onAdd(dataToSend);
+    }
+
+    // Successful submission ke baad form ko reset karte hain.
+    setFormData({
+      company: "",
+      role: "",
+      location: "",
+      ctc: "",
+      deadline: getTodayEODLocal(),
+      oaDate: "",
+      mode: "",
+      interVDate: "",
+      interVMode: ""
     });
+  };
 
-    const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
+  // Email text se form fields ko populate karne ke liye function.
+  const parseAndPopulate = () => {
+    // ... Yahan par aapka Regular Expression (RegEx) logic hai.
+    // Yeh robust hone ke liye multiple patterns try karta hai aur predefined company list se match karta hai.
+    // (Detailed RegEx logic yahan nahi dikhaya gaya hai, lekin yeh is function ka main part hai).
+    // ...
+    let extractedData = {};
+    const normalizedText = emailText.toLowerCase();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const companyList = [
+      "slb", "dp world", "google", "kkr", "kohlberg kravis roberts & co.", "kkr & co. inc.", "visa", "phonepe"
+    ];
+    let companyName = '';
+    for (const company of companyList) {
+      if (normalizedText.includes(company)) {
+        companyName = company;
+        break;
+      }
+    }
+    extractedData.company = companyName;
 
-        if (!formData.company || !formData.role) {
-            alert("Company and Role are required.");
-            return;
-        }
-        
-        // Create a copy of formData to modify before sending
-        const dataToSend = { ...formData };
-        if (!dataToSend.oaDate) dataToSend.oaDate = null;
-        if (!dataToSend.interVDate) dataToSend.interVDate = null;
-        
-        // Call the parent's onAdd function with the cleaned data
-        if (onAdd) {
-            await onAdd(dataToSend); // Await the onAdd call
-        }
+    let roleMatch = normalizedText.match(/profile\s*:\s*([a-z\s-]+)\s*-/);
+    if (!roleMatch) {
+      roleMatch = normalizedText.match(/role:\s*([a-z\s-]+)\s*(\(fte\))?/);
+    }
+    extractedData.role = roleMatch ? roleMatch[1].trim() : '';
 
-        // Reset form after successful submission
-        setFormData({
-            company: "",
-            role: "",
-            location: "",
-            ctc: "",
-            deadline: getTodayEODLocal(),
-            oaDate: "",
-            mode: "",
-            interVDate: "",
-            interVMode: ""
-        });
-    };
-    const parseAndPopulate = () => {
-        // 1. Initialize an object to hold the extracted data.
-        let extractedData = {};
+    let locationMatch = normalizedText.match(/location\s*:\s*([a-z]+)/);
+    if (!locationMatch) {
+      locationMatch = normalizedText.match(/job locations:\s*([a-z\s/]+)/);
+    }
+    extractedData.location = locationMatch ? locationMatch[1].trim() : '';
 
-        // Clean up the text for easier parsing
-        const normalizedText = emailText.toLowerCase();
+    let ctcMatch = normalizedText.match(/-\s*([\d.]+lpa)/);
+    if (!ctcMatch) {
+      ctcMatch = normalizedText.match(/ctc:\s*₹?([\d,]+)/);
+    }
+    extractedData.ctc = ctcMatch ? ctcMatch[1].replace(',', '') : '';
 
-        const companyList = [
-            "slb",
-            "dp world",
-            "google",
-            "KKR",
-            "Kohlberg Kravis Roberts & Co.",
-            "KKR & Co. Inc.",
-            "Visa",
-            "PhonePe"
-            // add more companies
-        ];
-        let companyName = '';
-        for (const company of companyList) {
-            if (normalizedText.includes(company)) {
-                companyName = company;
-                break;
-            }
-        }
-        extractedData.company = companyName;
+    let deadlineDate = null;
+    let deadlineMatch = normalizedText.match(/\((\d{2}\/\d{2}\/\d{4})\)/);
+    if (deadlineMatch) {
+      deadlineDate = new Date(deadlineMatch[1].replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')).toISOString().slice(0, 16);
+    } else {
+      const monthMap = { 'january': '01', 'february': '02', 'march': '03', 'april': '04', 'may': '05', 'june': '06', 'july': '07', 'august': '08', 'september': '09', 'october': '10', 'november': '11', 'december': '12' };
+      const deadlineTextMatch = normalizedText.match(/deadline\s*:\s*(\d{1,2})\s*([a-z]+)\s*(\d{1,2}:\d{2})\s*pm/);
+      if (deadlineTextMatch) {
+        const [, day, month, time] = deadlineTextMatch;
+        const monthNumber = monthMap[month];
+        const [hour, minute] = time.split(':');
+        extractedData.deadline = `2025-${monthNumber}-${day}T${(parseInt(hour) + 12).toString().padStart(2, '0')}:${minute}`;
+      } else {
+        extractedData.deadline = getTodayEODLocal();
+      }
+    }
+    extractedData.deadline = deadlineDate;
+    
+    setFormData(prevData => ({ ...prevData, ...extractedData }));
+  };
 
-        // 3. Try to extract Role
-        // Pattern A: "Job Profile: [role] - [ctc]" (from first example)
-        let roleMatch = normalizedText.match(/profile\s*:\s*([a-z\s-]+)\s*-/);
-        // Pattern B: "Role: [role]" (from second example)
-        if (!roleMatch) {
-            roleMatch = normalizedText.match(/role:\s*([a-z\s-]+)\s*(\(fte\))?/);
-        }
-        extractedData.role = roleMatch ? roleMatch[1].trim() : '';
-
-        // 4. Try to extract Location
-        // Pattern A: "Location: [location]" (from first example)
-        let locationMatch = normalizedText.match(/location\s*:\s*([a-z]+)/);
-        // Pattern B: "Job Locations: [location] / [location]..." (from second example)
-        if (!locationMatch) {
-            locationMatch = normalizedText.match(/job locations:\s*([a-z\s/]+)/);
-        }
-        extractedData.location = locationMatch ? locationMatch[1].trim() : '';
-
-        // 5. Try to extract CTC
-        // Pattern A: " - [ctc]" (after a role) (from first example)
-        let ctcMatch = normalizedText.match(/-\s*([\d.]+lpa)/);
-        // Pattern B: "CTC: ₹[ctc]" (from second example)
-        if (!ctcMatch) {
-            ctcMatch = normalizedText.match(/ctc:\s*₹?([\d,]+)/);
-        }
-        extractedData.ctc = ctcMatch ? ctcMatch[1].replace(',', '') : '';
-
-        // 6. Try to extract Deadline
-        // Pattern A: "Tomorrow (DD/MM/YYYY)" (from first example)
-        let deadlineMatch = normalizedText.match(/\((\d{2}\/\d{2}\/\d{4})\)/);
-        // Pattern B: "DEADLINE : DD Month PM" (from second example)
-        if (!deadlineMatch) {
-            const monthMap = { 'january': '01', 'february': '02', 'march': '03', 'april': '04', 'may': '05', 'june': '06', 'july': '07', 'august': '08', 'september': '09', 'october': '10', 'november': '11', 'december': '12' };
-            const deadlineTextMatch = normalizedText.match(/deadline\s*:\s*(\d{1,2})\s*([a-z]+)\s*(\d{1,2}:\d{2})\s*pm/);
-            if (deadlineTextMatch) {
-                const [, day, month, time] = deadlineTextMatch;
-                const monthNumber = monthMap[month];
-                const [hour, minute] = time.split(':');
-                // Construct a parsable date string
-                extractedData.deadline = `2025-${monthNumber}-${day}T${(parseInt(hour) + 12).toString().padStart(2, '0')}:${minute}`;
-            }
-        } else {
-            // If first pattern matched, convert date
-            extractedData.deadline = new Date(deadlineMatch[1].replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3')).toISOString().slice(0, 16);
-        }
-
-        // 7. Update the formData state with the new values
-        setFormData(prevData => ({ ...prevData, ...extractedData }));
-    };
-
-
-
-    const handleCancel = () => {
-        if (onCancel) onCancel();
-    };
-    // Inject CSS for calendar icon color
-    useEffect(() => {
-        const style = document.createElement("style");
-        style.innerHTML = `
-            input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-                filter: invert(55%) sepia(100%) saturate(500%) hue-rotate(160deg);
-                cursor: pointer;
-            }
-        `;
-        document.head.appendChild(style);
-        return () => {
-            document.head.removeChild(style);
-        };
-    }, []);
-    // Enhanced dynamic colors based on mode
+  // Cancel button ke liye handler, jo parent ke `onCancel` prop ko call karta hai.
+  const handleCancel = () => {
+    if (onCancel) onCancel();
+  };
     // Enhanced dynamic colors based on mode
 const cardBg =
   mode === "dark"
@@ -202,7 +219,7 @@ const selectBg =
 
     return (
         <div
-            className={`relative rounded-2xl border overflow-hidden group transition-all duration-500 hover:shadow-2xl  ${cardBg} ${mode === "dark"
+            className={`relative rounded-2xl border overflow-hidden group transition-all duration-500 hover:shadow-2xl  ${cardBg} ${mode === "dark"
                 ? "hover:shadow-cyan-500/20"
                 : "hover:shadow-blue-500/25"
                 }`}
@@ -381,7 +398,7 @@ const selectBg =
                                 value={formData.deadline}
                                 onChange={(e) => handleChange("deadline", e.target.value)}
                                 className={`w-full font-mono text-sm font-bold rounded-md px-3 py-2 border transition-all duration-200 ${inputBg}`}
-                                
+
                             />
                         </div>
 
