@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+// Corrected import paths based on the new file structure
 import Company from "../model/form.model.js";
 import User from "../model/user.model.js";
 import { connectDB } from "../utils/db.js";
