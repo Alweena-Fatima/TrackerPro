@@ -14,13 +14,18 @@ async function connectDB() {
   isConnected = true;
 }
 
-// This function will be triggered by Vercel cron
+// Limit batch size to avoid timeout
+const BATCH_SIZE = 5;
+
 export default async function handler(req, res) {
   try {
     await connectDB();
-
     const now = new Date();
-    const emails = await ScheduledEmail.find({ status: "pending", sendTime: { $lte: now } });
+
+    const emails = await ScheduledEmail.find({
+      status: "pending",
+      sendTime: { $lte: now },
+    }).limit(BATCH_SIZE);
 
     for (let job of emails) {
       const company = await Company.findById(job.companyId);
@@ -33,7 +38,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ message: `${emails.length} emails sent successfully.` });
   } catch (err) {
-    console.error("Scheduled email error:", err);
+    console.error(err);
     res.status(500).json({ message: "Error sending scheduled emails" });
   }
 }
