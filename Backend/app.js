@@ -7,7 +7,7 @@ import User from "./model/user.model.js";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import cron from "node-cron";
+// import cron from "node-cron";
 import ScheduledEmail from "./model/scheduledEmail.model.js";
 import sendReminder from "./utils/mailer.js";
 // Initialize Express app
@@ -258,18 +258,18 @@ app.post("/schedule-notification",authtoken, async (req, res) => {
   res.json({ message: "Email scheduled successfully" });
 });
 
-cron.schedule("* * * * *", async () => {
-  const now = new Date();
-  const emails = await ScheduledEmail.find({ status: "pending", sendTime: { $lte: now } });
+// cron.schedule("* * * * *", async () => {
+//   const now = new Date();
+//   const emails = await ScheduledEmail.find({ status: "pending", sendTime: { $lte: now } });
 
-  for (let job of emails) {
-    const company = await Company.findById(job.companyId);
-    if (company) {
-      await sendReminder(job.userEmail, company.company, company.deadline);
-      job.status = "sent";
-      await job.save();
-    }
-  }
-});
+//   for (let job of emails) {
+//     const company = await Company.findById(job.companyId);
+//     if (company) {
+//       await sendReminder(job.userEmail, company.company, company.deadline);
+//       job.status = "sent";
+//       await job.save();
+//     }
+//   }
+// });
 // Start the server
 export default app;
