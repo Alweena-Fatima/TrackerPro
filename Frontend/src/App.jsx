@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import CompanyCard from "./component/Card.jsx";
 import Sidebar from "./component/Sidebar.jsx";
-import AddCard from "./component/AddCard.jsx";
+import AddCard from "./component/Addcard.jsx";
 import UserAuth from "./component/User.jsx";
 import AboutMe from "./component/AboutMe.jsx";
 
