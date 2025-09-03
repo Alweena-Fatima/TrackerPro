@@ -32,7 +32,7 @@ function UserAuth({ mode = "dark", onLoginSuccess }) {
     try {
       // isLogin state ke hisaab se sahi API endpoint (/login ya /signup) choose karte hain.
       const endpoint = isLogin ? "login" : "signup";
-      const res = await fetch(`http://localhost:3000/${endpoint}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

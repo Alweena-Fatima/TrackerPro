@@ -56,7 +56,7 @@ function App() {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/companies", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/companies`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ function App() {
     try {
       let res;
       if (companyData._id) {
-        res = await fetch(`http://localhost:3000/companies/${companyData._id}`, {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/companies/${companyData._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -111,7 +111,7 @@ function App() {
           body: JSON.stringify(companyData),
         });
       } else {
-        res = await fetch("http://localhost:3000/companies", {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/companies`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -154,7 +154,7 @@ function App() {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/companies/${company._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/companies/${company._id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

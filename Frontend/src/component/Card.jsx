@@ -40,7 +40,7 @@ function CompanyCard({ company, onDelete, onEdit, mode }) {
 
     try {
       // Await fetch and store response in res
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/schedule-notification`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/schedule-notification`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
