@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState, useEffect } from "react";
 import CompanyCard from "./component/Card.jsx";
 import Sidebar from "./component/Sidebar.jsx";
@@ -13,8 +12,14 @@ import AboutMe from "./component/AboutMe.jsx";
 function App() {
   // State for storing the list of all companies
   const [companies, setCompanies] = useState([]);
+  
   // State to control the application's theme (light/dark mode)
-  const [mode, setMode] = useState("light");
+  // It now reads the initial value from localStorage or defaults to 'light'.
+  const [mode, setMode] = useState(() => {
+    const savedMode = localStorage.getItem('theme');
+    return savedMode || 'light';
+  });
+
   // State to determine which component is currently visible (home, add, user, about)
   const [currView, setCurrView] = useState("home");
   // State to track the user's authentication status
@@ -28,6 +33,11 @@ function App() {
 
   // Function to toggle between light and dark mode
   const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
+
+  // useEffect hook to save the theme to localStorage whenever it changes.
+  useEffect(() => {
+    localStorage.setItem('theme', mode);
+  }, [mode]);
 
   // useEffect hook to handle initial authentication check on component mount
   useEffect(() => {
@@ -65,7 +75,7 @@ function App() {
       });
 
       if (!res.ok) {
-        if (res.status === 401) {
+        if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setIsAuthenticated(false);
