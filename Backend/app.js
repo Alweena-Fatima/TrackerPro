@@ -13,8 +13,11 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://tracker-pro-ek5j.vercel.app'
+}));
+
+
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-here-change-in-production";
