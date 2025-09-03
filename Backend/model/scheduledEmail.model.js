@@ -1,10 +1,25 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const scheduledEmailSchema = new mongoose.Schema({
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
-  userEmail: { type: String, required: true },
-  sendTime: { type: Date, required: true }, // deadline - 1 hour
-  status: { type: String, enum: ["pending", "sent"], default: "pending" },
-});
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: true,
+    },
+    userEmail: {
+        type: String,
+        required: true,
+    },
+    sendTime: {
+        type: Date,
+        required: true,
+    },
+    sent: {
+        type: Boolean,
+        default: false,
+    },
+}, { timestamps: true });
 
-export default mongoose.model("ScheduledEmail", scheduledEmailSchema);
+const ScheduledEmail = mongoose.model('ScheduledEmail', scheduledEmailSchema);
+
+export default ScheduledEmail;

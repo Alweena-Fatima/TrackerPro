@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import app from '../app.js'; // Your main Express app
+// UPDATED: Import path now matches your new file name
+import startScheduledEmailChecks from './startScheduledEmails.js'; 
 
 // Configure environment variables
 dotenv.config();
 
 // --- STARTING SERVER ---
-// These are your debug logs, they are still useful
 console.log('Attempting to start server...');
 console.log('MONGO_URI found:', !!process.env.MONGO_URI);
 console.log('JWT_SECRET found:', !!process.env.JWT_SECRET);
@@ -28,9 +29,14 @@ mongoose.connect(MONGO_URI)
         // Start listening for requests only after the DB connection is successful
         app.listen(PORT, () => {
             console.log(`Server is running and listening on port ${PORT}`);
+            
+            // Start the cron job after the server is running
+            startScheduledEmailChecks(); 
+            console.log("Cron job for scheduled emails has been started.");
         });
     })
     .catch((error) => {
         console.error("MongoDB connection failed:", error.message);
         process.exit(1); // Exit the application if the DB connection fails
     });
+
