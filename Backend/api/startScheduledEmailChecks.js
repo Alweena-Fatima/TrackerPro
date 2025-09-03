@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import ScheduledEmail from '../model/scheduledEmail.model.js';
 import Company from '../model/form.model.js';
-import sendReminder from '../utils/sendEmail.js';
+import sendReminder from '../utils/sendRemainder.js';
 
 const startScheduledEmailChecks = () => {
     // Run this job every minute
