@@ -81,14 +81,32 @@ function AddCard({ onAdd, onCancel, mode, editingCompany }) {
     
     // `formData` ki ek copy banate hain taaki direct state mutation se bacha ja sake.
     const dataToSend = { ...formData };
+
+    // ====================================================================
+    // TIMEZONE FIX: Convert local datetime strings to full ISO UTC strings.
+    // ====================================================================
+    // new Date("2025-09-03T16:32") creates a date object in the user's LOCAL timezone.
+    // .toISOString() converts that local time to the correct UTC equivalent string.
+    if (dataToSend.deadline) {
+        dataToSend.deadline = new Date(dataToSend.deadline).toISOString();
+    }
+    // Khali date strings ko `null` mein convert karte hain, jo backend schema ke saath match karta hai.
+    if (dataToSend.oaDate) {
+        dataToSend.oaDate = new Date(dataToSend.oaDate).toISOString();
+    } else {
+        dataToSend.oaDate = null;
+    }
+
+    if (dataToSend.interVDate) {
+        dataToSend.interVDate = new Date(dataToSend.interVDate).toISOString();
+    } else {
+        dataToSend.interVDate = null;
+    }
+    
     // Agar hum 'edit' mode mein hain, toh company ki unique ID (`_id`) ko data mein jor dete hain.
     if (editingCompany) {
       dataToSend._id = editingCompany._id;
     }
-
-    // Khali date strings ko `null` mein convert karte hain, jo backend schema ke saath match karta hai.
-    if (!dataToSend.oaDate) dataToSend.oaDate = null;
-    if (!dataToSend.interVDate) dataToSend.interVDate = null;
     
     // Parent component ki `onAdd` function ko call karte hain processed data ke saath.
     if (onAdd) {
@@ -111,10 +129,7 @@ function AddCard({ onAdd, onCancel, mode, editingCompany }) {
 
   // Email text se form fields ko populate karne ke liye function.
   const parseAndPopulate = () => {
-    // ... Yahan par aapka Regular Expression (RegEx) logic hai.
-    // Yeh robust hone ke liye multiple patterns try karta hai aur predefined company list se match karta hai.
-    // (Detailed RegEx logic yahan nahi dikhaya gaya hai, lekin yeh is function ka main part hai).
-    // ...
+    // ... (Your RegEx logic remains unchanged) ...
     let extractedData = {};
     const normalizedText = emailText.toLowerCase();
 
@@ -219,7 +234,7 @@ const selectBg =
 
     return (
         <div
-            className={`relative rounded-2xl border overflow-hidden group transition-all duration-500 hover:shadow-2xl  ${cardBg} ${mode === "dark"
+            className={`relative rounded-2xl border overflow-hidden group transition-all duration-500 hover:shadow-2xl  ${cardBg} ${mode === "dark"
                 ? "hover:shadow-cyan-500/20"
                 : "hover:shadow-blue-500/25"
                 }`}
