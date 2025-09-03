@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 // Corrected import paths based on the new file structure
 import Company from "./model/form.model.js";
 import User from "./model/user.model.js";
-import { connectDB } from "./utils/db.js";
 import mongoose from "mongoose";
 
 dotenv.config();
@@ -45,7 +44,6 @@ const authtoken = (req, res, next) => {
 // Route for new user signup
 app.post("/signup", async (req, res) => {
     try {
-        await connectDB();
         const { userid, password } = req.body;
         if (!userid || !password) {
             return res.status(400).json({ success: false, message: "User ID and password are required." });
@@ -78,7 +76,6 @@ app.get("/", (req, res) => {
 // Route for user login
 app.post("/login", async (req, res) => {
     try {
-        await connectDB();
         const { userid, password } = req.body;
         if (!userid || !password) {
             return res.status(400).json({ success: false, message: "User ID and password are required." });
@@ -115,7 +112,6 @@ app.post("/login", async (req, res) => {
 
 app.get("/companies", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const companies = await Company.find({ userId: req.user.userId });
         res.json(companies);
     } catch (err) {
@@ -125,7 +121,6 @@ app.get("/companies", authtoken, async (req, res) => {
 
 app.post("/companies", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const newCompany = new Company({ ...req.body, userId: req.user.userId });
         const savedCompany = await newCompany.save();
         return res.status(201).json(savedCompany);
@@ -136,7 +131,6 @@ app.post("/companies", authtoken, async (req, res) => {
 
 app.put("/companies/:id", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const { id } = req.params;
         const { userId } = req.user;
         const updatedCompany = await Company.findOneAndUpdate(
@@ -156,7 +150,6 @@ app.put("/companies/:id", authtoken, async (req, res) => {
 
 app.delete("/companies/:id", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ error: "Invalid ID format" });
@@ -176,7 +169,6 @@ app.delete("/companies/:id", authtoken, async (req, res) => {
 
 app.post("/notify", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const { email, companyId } = req.body;
         if (!email || !companyId) {
             return res.status(400).json({ message: "Email and companyId required" });
@@ -199,7 +191,6 @@ app.post("/notify", authtoken, async (req, res) => {
 
 app.post("/schedule-notification", authtoken, async (req, res) => {
     try {
-        await connectDB();
         const { email, companyId } = req.body;
         const company = await Company.findById(companyId);
         if (!company) return res.status(404).json({ message: "Company not found" });
