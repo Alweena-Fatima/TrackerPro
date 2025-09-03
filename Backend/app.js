@@ -70,6 +70,10 @@ app.post("/signup", async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during signup." });
     }
 });
+// Health Check Route
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Tracker Pro API is running!" });
+});
 
 // Route for user login
 app.post("/login", async (req, res) => {
