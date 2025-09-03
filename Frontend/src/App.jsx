@@ -64,12 +64,39 @@ function App() {
   // ====================================================================
 
   // Function to show a browser notification
+  // Function to show a browser notification
   const showNotification = (company) => {
     if (Notification.permission === "granted") {
-      new Notification("Application Deadline Reminder", {
-        body: `Your deadline for ${company.role} at ${company.company} is approaching!`,
-        icon: '/favicon.ico' // Optional: add an icon
-      });
+      
+      // 1. Play a simple sound effect
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sine'; // A clean "beep" sound
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A high-pitched note
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Adjust volume
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1); // Play for 0.1 seconds
+      } catch (e) {
+        console.error("Could not play notification sound.", e);
+      }
+
+      // 2. Create the new, more detailed notification
+      const deadline = new Date(company.deadline);
+      const options = {
+        body: `Your deadline for "${company.role}" is ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString()}. Good luck!`,
+        icon: '/favicon.ico', // Your app's icon
+        tag: company._id,     // Use a tag to prevent duplicate notifications for the same event
+        renotify: true,       // Allow the notification to re-alert the user
+      };
+      
+      new Notification(`Reminder: ${company.company}`, options);
     }
   };
 
