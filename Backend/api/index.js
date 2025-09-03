@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import app from '../app.js'; // Your main Express app
 // UPDATED: Import path now matches your new file name
-import startScheduledEmailChecks from './startScheduledEmails.js'; 
+import startScheduledEmailChecks from './startScheduledEmailChecks.js'; 
 
 // Configure environment variables
 dotenv.config();
